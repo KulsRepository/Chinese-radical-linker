@@ -1,0 +1,2 @@
+reorganizor.py is the one to use, if it doesnt for whatever reason, reorganiser_trying_again.py is the one completely fixed 
+by an LLM AI model, hence I shall put both my work and the one which doesn't belong to me.

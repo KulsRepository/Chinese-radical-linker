@@ -1,6 +1,6 @@
 import json
 
-input = 'dictionary.txt'
+input = 'dictionary_raw.txt'
 output = 'characters_data.json'
 
 processed_data = {}
@@ -13,7 +13,7 @@ try:
                 continue
 
             entry = json.loads(line.strip())
-            char = entry.get('characters')
+            char = entry.get('character')
             pinyin_list = entry.get('pinyin', [])
             definition = entry.get('definition', '')
             radical_char = entry.get('radical')
@@ -39,7 +39,7 @@ except Exception as e:
 
 if processed_data:
     with open(output, 'w', encoding='utf-8') as outfile:
-        json.dump(processed_data, file, ensure_ascii=False, indent=4)
+        json.dump(processed_data, outfile, ensure_ascii=False, indent=4)
     print(f"Processed data successfully written to '{output}, succesfully processed {len(processed_data)} entries.'")
 else:
-    "bruh"
+    print("No data processed. This might mean the input file was empty, or no valid entries were found.")
