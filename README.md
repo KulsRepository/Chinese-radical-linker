@@ -22,7 +22,7 @@ ________________________________________________________________________________
 
 **The actual app itself**
 
-![Character breakdown example](images/Capture.png)
+![Character breakdown example](images/Capture.PNG)
 
 The text box has an integrated pinyin keyboard, from which you can choose Chinese characters, many of which will be referenced in characters_data.json (many aren't as characters_data.json contains about 9500 Chinese 
 characters, which is much less than accessible with the pinyin keyboard). Once you see your chosen Chinese character in your keyboard, you can click on it and you will be met with its definition and radical it is 
