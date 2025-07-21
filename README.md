@@ -2,7 +2,7 @@ This is a web-app capable of finding the definition and linked radical of around
 
 You most likely can't run it as a file on a browser due to a CORS error which occurs due to Google not liking to read local JSON files.
 
-You can go to the folder where you downloaded this code throiugh cd-ing in cmd and then start a local server, then you can go to localhost 8888 with your browser 
+You can go to the folder where you downloaded this code throiugh cd-ing in cmd and then start a local server, then you can go to localhost 8000 with your browser 
 (http://localhost:8000/) if it isnt used to be able to use this app
 _________________________________________________________________________________________________
 
@@ -22,7 +22,7 @@ ________________________________________________________________________________
 
 **The actual app itself**
 
-![Character breakdown example](images/example.png)
+![Character breakdown example](images/Capture.PNG)
 
 The text box has an integrated pinyin keyboard, from which you can choose Chinese characters, many of which will be referenced in characters_data.json (many aren't as characters_data.json contains about 9500 Chinese 
 characters, which is much less than accessible with the pinyin keyboard). Once you see your chosen Chinese character in your keyboard, you can click on it and you will be met with its definition and radical it is 
