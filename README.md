@@ -4,3 +4,8 @@ You most likely can't run it as a file on a browser due to a CORS error which oc
 
 You can go to the folder where you downloaded this code throiugh cd-ing in cmd and then start a local server, then you can go to localhost 8888 with your browser 
 (http://localhost:8000/) if it isnt used to be able to use this app
+_________________________________________________________________________________________________
+
+characters_data.json is a data-readable JSON file of 9500 most used Chinese characters, accompanied by their definitions and their corresponding radicals.
+
+radicals_details.json is all the radicals in all their forms
