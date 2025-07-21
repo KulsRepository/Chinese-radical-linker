@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanzi Radical Explorer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- pinyin-util CDN for Pinyin to Hanzi conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-util@1.2.3/dist/pinyin-util.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0ffef; /* Very light green background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff; /* White card background */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden; /* Ensure rounded corners are respected */
+        }
+        .character-display {
+            font-size: 8rem; /* Large character size */
+            font-weight: bold;
+            color: #2c3e50; /* Dark blue for character */
+            margin-bottom: 10px;
+            min-height: 120px; /* Ensure space even if no character */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .pinyin-definition {
+            font-size: 1.5rem;
+            color: #34495e; /* Slightly lighter dark blue */
+            margin-bottom: 20px;
+        }
+        .radical-info {
+            background-color: #ecf0f1; /* Light gray for radical box */
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #dcdfe4; /* Subtle border */
+        }
+        .radical-info p {
+            margin: 5px 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        .radical-info .radical-char {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #e74c3c; /* Red for radical character */
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .radical-info .radical-detail {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2980b9; /* Blue for radical detail */
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            max-width: 250px; /* Limit input width */
+        }
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+        button {
+            background-color: #3498db; /* Blue button */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            border: none;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            background-color: #f39c12; /* Orange for warnings */
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            display: none; /* Hidden by default */
+        }
+        .pinyin-candidates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f5e9; /* Light green background for candidates */
+            border-radius: 12px;
+            min-height: 40px; /* Ensure space for candidates */
+        }
+        .pinyin-candidate-item {
+            padding: 8px 12px;
+            background-color: #4CAF50; /* Green for candidate buttons */
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.2s ease;
+        }
+        .pinyin-candidate-item:hover {
+            background-color: #45a049;
+        }
+        .loading-indicator {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Hanzi Radical Explorer</h1>
+
+        <div class="input-group">
+            <input type="text" id="characterInput" placeholder="Type Pinyin or Chinese character">
+            <button id="exploreButton">Explore</button>
+        </div>
+
+        <div id="pinyinCandidates" class="pinyin-candidates">
+            <!-- Pinyin candidates will be displayed here -->
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator hidden">Loading dictionary...</div>
+        <div id="messageBox" class="message-box"></div>
+
+        <div id="characterDisplay" class="character-display"></div>
+        <div id="pinyinDefinition" class="pinyin-definition"></div>
+
+        <div id="radicalInfo" class="radical-info hidden">
+            <p><span class="radical-char" id="radicalChar"></span> <span class="radical-detail" id="radicalPinyin"></span></p>
+            <p class="text-gray-700" id="radicalMeaning"></p>
+            <p class="text-sm text-gray-500 mt-2" id="radicalPosition"></p>
+        </div>
+
+        <div class="mt-8 text-gray-600 text-sm">
+            <p>Enter a Chinese character or its Pinyin to explore its radical!</p>
+            <p>Try characters like: 你 (nǐ), 好 (hǎo), 水 (shuǐ), 木 (mù), 中 (zhōng), 鱼 (yú), 龙 (lóng), 鸟 (niǎo)</p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables to store loaded dictionary data
+        let charactersData = {}; // Maps Chinese character to its Pinyin, definition, and primary radical character
+        let radicalsDetails = {}; // Maps radical character to its Pinyin, meaning, and position
+
+        const CHARACTERS_FILE_PATH = 'characters_data.json'; // This is the file you generated with the Python script
+        const RADICALS_FILE_PATH = 'radicals_details.json'; // This is the file you'll create from the JSON below
+
+        // Get DOM elements
+        const characterInput = document.getElementById('characterInput');
+        const exploreButton = document.getElementById('exploreButton');
+        const characterDisplay = document.getElementById('characterDisplay');
+        const pinyinDefinition = document.getElementById('pinyinDefinition');
+        const radicalInfo = document.getElementById('radicalInfo');
+        const radicalChar = document.getElementById('radicalChar');
+        const radicalPinyin = document.getElementById('radicalPinyin');
+        const radicalMeaning = document.getElementById('radicalMeaning');
+        const radicalPosition = document.getElementById('radicalPosition');
+        const messageBox = document.getElementById('messageBox');
+        const pinyinCandidatesDiv = document.getElementById('pinyinCandidates');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        // Function to display messages
+        function showMessage(message, type = 'warning') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type === 'error' ? 'bg-red-500' : 'bg-orange-500'}`;
+            messageBox.style.display = 'block';
+        }
+
+        // Function to hide messages
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        // Function to update the display with character and radical info
+        function updateDisplay(characterData) {
+            hideMessage(); // Clear any previous messages
+
+            if (characterData) {
+                characterDisplay.textContent = characterData.character;
+                pinyinDefinition.textContent = `${characterData.pinyin} - ${characterData.definition}`;
+
+                radicalChar.textContent = characterData.radical.character;
+                radicalPinyin.textContent = characterData.radical.pinyin;
+                radicalMeaning.textContent = characterData.radical.meaning;
+                radicalPosition.textContent = `Position: ${characterData.radical.position}`;
+                radicalInfo.classList.remove('hidden');
+            } else {
+                characterDisplay.textContent = '';
+                pinyinDefinition.textContent = '';
+                radicalInfo.classList.add('hidden');
+            }
+        }
+
+        // Function to display Pinyin candidates
+        function displayPinyinCandidates(pinyin) {
+            pinyinCandidatesDiv.innerHTML = ''; // Clear previous candidates
+            if (!pinyin) {
+                return;
+            }
+
+            // pinyinUtil.getHanzi(pinyin) returns a string of characters, e.g., "你好学习"
+            const candidatesString = pinyinUtil.getHanzi(pinyin);
+            if (candidatesString) {
+                const candidatesArray = candidatesString.split('');
+
+                const maxCandidates = 20; // Limit to avoid overwhelming the display
+                for (let i = 0; i < Math.min(candidatesArray.length, maxCandidates); i++) {
+                    const char = candidatesArray[i];
+                    const candidateItem = document.createElement('span');
+                    candidateItem.classList.add('pinyin-candidate-item');
+                    candidateItem.textContent = char;
+                    candidateItem.addEventListener('click', () => {
+                        characterInput.value = char; // Set the selected character to the input
+                        pinyinCandidatesDiv.innerHTML = ''; // Clear candidates after selection
+                        exploreButton.click(); // Trigger exploration for the selected character
+                    });
+                    pinyinCandidatesDiv.appendChild(candidateItem);
+                }
+            }
+        }
+
+        // Event listener for input changes to suggest Pinyin characters
+        characterInput.addEventListener('input', (event) => {
+            const inputVal = event.target.value.trim().toLowerCase();
+
+            // Check if the input is Pinyin (contains only Latin letters)
+            if (/^[a-z]+$/.test(inputVal)) {
+                displayPinyinCandidates(inputVal);
+                // Clear main display when typing Pinyin, until a character is selected
+                updateDisplay(null);
+            } else {
+                pinyinCandidatesDiv.innerHTML = ''; // Clear candidates if not typing Pinyin
+                // If it's a Chinese character, let the explore button handle it
+            }
+        });
+
+
+        // Event listener for the Explore button
+        exploreButton.addEventListener('click', () => {
+            const inputChar = characterInput.value.trim();
+            pinyinCandidatesDiv.innerHTML = ''; // Clear candidates on explore
+
+            // Basic validation: ensure only one Chinese character is entered
+            if (!inputChar) {
+                showMessage('Please enter a Chinese character or Pinyin.');
+                updateDisplay(null); // Clear display
+                return;
+            }
+
+            // If the input is a multi-character Chinese word, prompt the user to select one
+            if (inputChar.length > 1 && /[\u4e00-\u9fff]/.test(inputChar)) {
+                showMessage('Please select or enter only one Chinese character to explore its radical.');
+                updateDisplay(null); // Clear previous results
+                return;
+            }
+
+            // A very basic check if it's a single Chinese character
+            if (!/[\u4e00-\u9fff]/.test(inputChar) || inputChar.length !== 1) {
+                // If it's not a single Chinese character, and it's not Pinyin (handled by input listener),
+                // then it's an invalid input for direct lookup.
+                showMessage('Please enter a single Chinese character or its Pinyin.');
+                updateDisplay(null); // Clear display
+                return;
+            }
+
+            // Check if both dictionaries are loaded
+            if (Object.keys(charactersData).length === 0 || Object.keys(radicalsDetails).length === 0) {
+                showMessage('Dictionary data is still loading. Please wait a moment and try again.', 'error');
+                return;
+            }
+
+            const charInfo = charactersData[inputChar]; // Get Pinyin, definition, and radical_char for the input character
+
+            if (charInfo) {
+                const radicalChar = charInfo.radical_char;
+                const radicalDetail = radicalsDetails[radicalChar]; // Get detailed info for the radical character
+
+                if (radicalDetail) {
+                    updateDisplay({
+                        character: inputChar,
+                        pinyin: charInfo.pinyin,
+                        definition: charInfo.definition,
+                        radical: {
+                            character: radicalChar,
+                            pinyin: radicalDetail.pinyin,
+                            meaning: radicalDetail.meaning,
+                            position: radicalDetail.position
+                        }
+                    });
+                } else {
+                    // This case should ideally not happen if characters_data.json points to valid radicals
+                    showMessage(`Radical details for "${radicalChar}" not found in radicals_details.json. This indicates a data inconsistency.`, 'error');
+                    updateDisplay(null);
+                }
+            } else {
+                showMessage(`Information for "${inputChar}" not found in the loaded character dictionary.`, 'warning');
+                updateDisplay(null); // Clear display
+            }
+        });
+
+        // Allow pressing Enter key to trigger exploration
+        characterInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                exploreButton.click();
+            }
+        });
+
+        // --- Dictionary Loading Logic ---
+        async function loadDictionaries() {
+            loadingIndicator.classList.remove('hidden'); // Show loading indicator
+            try {
+                // Load characters_data.json
+                const charactersResponse = await fetch(CHARACTERS_FILE_PATH);
+                if (!charactersResponse.ok) {
+                    throw new Error(`HTTP error! status: ${charactersResponse.status} for ${CHARACTERS_FILE_PATH}`);
+                }
+                charactersData = await charactersResponse.json();
+
+                // Load radicals_details.json
+                const radicalsResponse = await fetch(RADICALS_FILE_PATH);
+                if (!radicalsResponse.ok) {
+                    throw new Error(`HTTP error! status: ${radicalsResponse.status} for ${RADICALS_FILE_PATH}`);
+                }
+                radicalsDetails = await radicalsResponse.json();
+
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator
+                showMessage('Dictionaries loaded successfully! You can now explore characters.', 'success');
+                // Clear message after a few seconds
+                setTimeout(hideMessage, 3000);
+            } catch (error) {
+                console.error('Error loading dictionary files:', error);
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator
+                showMessage('Failed to load dictionary data. Please ensure JSON files exist and are valid. Check console for details.', 'error');
+            }
+        }
+
+        // Load the dictionaries when the page loads
+        document.addEventListener('DOMContentLoaded', loadDictionaries);
+
+        // Initial display reset
+        updateDisplay(null);
+    </script>
+</body>
+</html>

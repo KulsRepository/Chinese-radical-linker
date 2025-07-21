@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanzi Radical Explorer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- pinyin-util CDN for Pinyin to Hanzi conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-util@1.2.3/dist/pinyin-util.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff; /* White card background */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            overflow: hidden; /* Ensure rounded corners are respected */
+        }
+        .character-display {
+            font-size: 8rem; /* Large character size */
+            font-weight: bold;
+            color: #2c3e50; /* Dark blue for character */
+            margin-bottom: 10px;
+            min-height: 120px; /* Ensure space even if no character */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .pinyin-definition {
+            font-size: 1.5rem;
+            color: #34495e; /* Slightly lighter dark blue */
+            margin-bottom: 20px;
+        }
+        .radical-info {
+            background-color: #ecf0f1; /* Light gray for radical box */
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #dcdfe4; /* Subtle border */
+        }
+        .radical-info p {
+            margin: 5px 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        .radical-info .radical-char {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #e74c3c; /* Red for radical character */
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .radical-info .radical-detail {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2980b9; /* Blue for radical detail */
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            max-width: 250px; /* Limit input width */
+        }
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+        button {
+            background-color: #3498db; /* Blue button */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            border: none;
+        }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            background-color: #f39c12; /* Orange for warnings */
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            display: none; /* Hidden by default */
+        }
+        .pinyin-candidates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f5e9; /* Light green background for candidates */
+            border-radius: 12px;
+            min-height: 40px; /* Ensure space for candidates */
+        }
+        .pinyin-candidate-item {
+            padding: 8px 12px;
+            background-color: #4CAF50; /* Green for candidate buttons */
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.2s ease;
+        }
+        .pinyin-candidate-item:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Hanzi Radical Explorer</h1>
+
+        <div class="input-group">
+            <input type="text" id="characterInput" placeholder="Type Pinyin or Chinese character">
+            <button id="exploreButton">Explore</button>
+        </div>
+
+        <div id="pinyinCandidates" class="pinyin-candidates">
+            <!-- Pinyin candidates will be displayed here -->
+        </div>
+
+        <div id="messageBox" class="message-box"></div>
+
+        <div id="characterDisplay" class="character-display"></div>
+        <div id="pinyinDefinition" class="pinyin-definition"></div>
+
+        <div id="radicalInfo" class="radical-info hidden">
+            <p><span class="radical-char" id="radicalChar"></span> <span class="radical-detail" id="radicalPinyin"></span></p>
+            <p class="text-gray-700" id="radicalMeaning"></p>
+            <p class="text-sm text-gray-500 mt-2" id="radicalPosition"></p>
+        </div>
+
+        <div class="mt-8 text-gray-600 text-sm">
+            <p>Try characters like: 你, 好, 水, 河, 木, 林, 森, 口, 吃, 日, 明, 人, 他</p>
+            <p>Or type Pinyin like: ni, hao, shui, he, mu, lin, sen, kou, chi, ri, ming, ren, ta</p>
+        </div>
+    </div>
+
+    <script>
+        // Data for common Chinese characters and their radical information
+        // This is a simplified dataset for demonstration.
+        // In a real application, you would load this from a more comprehensive source (e.g., JSON file, API).
+        const chineseCharactersData = {
+            "你": {
+                pinyin: "nǐ",
+                definition: "you",
+                radical: {
+                    character: "亻",
+                    pinyin: "rén",
+                    meaning: "person (variant of 人)",
+                    position: "left"
+                }
+            },
+            "好": {
+                pinyin: "hǎo",
+                definition: "good; well; fine",
+                radical: {
+                    character: "女",
+                    pinyin: "nǚ",
+                    meaning: "woman",
+                    position: "left"
+                }
+            },
+            "水": {
+                pinyin: "shuǐ",
+                definition: "water",
+                radical: {
+                    character: "水",
+                    pinyin: "shuǐ",
+                    meaning: "water",
+                    position: "full character"
+                }
+            },
+            "河": {
+                pinyin: "hé",
+                definition: "river",
+                radical: {
+                    character: "氵",
+                    pinyin: "shuǐ",
+                    meaning: "water (variant of 水)",
+                    position: "left"
+                }
+            },
+            "木": {
+                pinyin: "mù",
+                definition: "wood; tree",
+                radical: {
+                    character: "木",
+                    pinyin: "mù",
+                    meaning: "wood; tree",
+                    position: "full character"
+                }
+            },
+            "林": {
+                pinyin: "lín",
+                definition: "forest; woods",
+                radical: {
+                    character: "木",
+                    pinyin: "mù",
+                    meaning: "wood; tree",
+                    position: "left"
+                }
+            },
+            "森": {
+                pinyin: "sēn",
+                definition: "forest; dense",
+                radical: {
+                    character: "木",
+                    pinyin: "mù",
+                    meaning: "wood; tree",
+                    position: "left"
+                }
+            },
+            "口": {
+                pinyin: "kǒu",
+                definition: "mouth",
+                radical: {
+                    character: "口",
+                    pinyin: "kǒu",
+                    meaning: "mouth",
+                    position: "full character"
+                }
+            },
+            "吃": {
+                pinyin: "chī",
+                definition: "to eat",
+                radical: {
+                    character: "口",
+                    pinyin: "kǒu",
+                    meaning: "mouth",
+                    position: "left"
+                }
+            },
+            "日": {
+                pinyin: "rì",
+                definition: "sun; day",
+                radical: {
+                    character: "日",
+                    pinyin: "rì",
+                    meaning: "sun; day",
+                    position: "full character"
+                }
+            },
+            "明": {
+                pinyin: "míng",
+                definition: "bright; clear; next (day)",
+                radical: {
+                    character: "日",
+                    pinyin: "rì",
+                    meaning: "sun; day",
+                    position: "left"
+                }
+            },
+            "人": {
+                pinyin: "rén",
+                definition: "person; human",
+                radical: {
+                    character: "人",
+                    pinyin: "rén",
+                    meaning: "person; human",
+                    position: "full character"
+                }
+            },
+            "他": {
+                pinyin: "tā",
+                definition: "he; him",
+                radical: {
+                    character: "亻",
+                    pinyin: "rén",
+                    meaning: "person (variant of 人)",
+                    position: "left"
+                }
+            },
+            "手": {
+                pinyin: "shǒu",
+                definition: "hand",
+                radical: {
+                    character: "手",
+                    pinyin: "shǒu",
+                    meaning: "hand",
+                    position: "full character"
+                }
+            },
+            "打": {
+                pinyin: "dǎ",
+                definition: "to hit; to strike; to play (ball games)",
+                radical: {
+                    character: "扌",
+                    pinyin: "shǒu",
+                    meaning: "hand (variant of 手)",
+                    position: "left"
+                }
+            },
+            "火": {
+                pinyin: "huǒ",
+                definition: "fire",
+                radical: {
+                    character: "火",
+                    pinyin: "huǒ",
+                    meaning: "fire",
+                    position: "full character"
+                }
+            },
+            "灯": {
+                pinyin: "dēng",
+                definition: "lamp; light",
+                radical: {
+                    character: "火",
+                    pinyin: "huǒ",
+                    meaning: "fire",
+                    position: "bottom" // Often simplified to 灬 at bottom
+                }
+            },
+            // Add more characters here if you expand your data
+            // Example for pinyin input:
+            "你好": { // Note: This is a two-character word, the app is designed for single characters
+                pinyin: "nǐhǎo",
+                definition: "hello",
+                radical: {
+                    character: "人",
+                    pinyin: "rén",
+                    meaning: "person",
+                    position: "left"
+                }
+            },
+            "学习": { // Note: This is a two-character word
+                pinyin: "xuéxí",
+                definition: "to study; to learn",
+                radical: {
+                    character: "子",
+                    pinyin: "zǐ",
+                    meaning: "child",
+                    position: "bottom"
+                }
+            },
+            "中国": { // Note: This is a two-character word
+                pinyin: "zhōngguó",
+                definition: "China",
+                radical: {
+                    character: "囗",
+                    pinyin: "wéi",
+                    meaning: "enclosure",
+                    position: "full enclosure"
+                }
+            }
+        };
+
+        // Get DOM elements
+        const characterInput = document.getElementById('characterInput');
+        const exploreButton = document.getElementById('exploreButton');
+        const characterDisplay = document.getElementById('characterDisplay');
+        const pinyinDefinition = document.getElementById('pinyinDefinition');
+        const radicalInfo = document.getElementById('radicalInfo');
+        const radicalChar = document.getElementById('radicalChar');
+        const radicalPinyin = document.getElementById('radicalPinyin');
+        const radicalMeaning = document.getElementById('radicalMeaning');
+        const radicalPosition = document.getElementById('radicalPosition');
+        const messageBox = document.getElementById('messageBox');
+        const pinyinCandidatesDiv = document.getElementById('pinyinCandidates');
+
+        // Function to display messages
+        function showMessage(message, type = 'warning') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type === 'error' ? 'bg-red-500' : 'bg-orange-500'}`;
+            messageBox.style.display = 'block';
+        }
+
+        // Function to hide messages
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        // Function to update the display with character and radical info
+        function updateDisplay(characterData) {
+            hideMessage(); // Clear any previous messages
+
+            if (characterData) {
+                characterDisplay.textContent = characterData.character;
+                pinyinDefinition.textContent = `${characterData.pinyin} - ${characterData.definition}`;
+
+                radicalChar.textContent = characterData.radical.character;
+                radicalPinyin.textContent = characterData.radical.pinyin;
+                radicalMeaning.textContent = characterData.radical.meaning;
+                radicalPosition.textContent = `Position: ${characterData.radical.position}`;
+                radicalInfo.classList.remove('hidden');
+            } else {
+                characterDisplay.textContent = '';
+                pinyinDefinition.textContent = '';
+                radicalInfo.classList.add('hidden');
+            }
+        }
+
+        // Function to display Pinyin candidates
+        function displayPinyinCandidates(pinyin) {
+            pinyinCandidatesDiv.innerHTML = ''; // Clear previous candidates
+            if (!pinyin) {
+                return;
+            }
+
+            // pinyinUtil.getHanzi(pinyin) returns a string of characters, e.g., "你好学习"
+            const candidatesString = pinyinUtil.getHanzi(pinyin);
+            if (candidatesString) {
+                // Split the string into individual characters
+                const candidatesArray = candidatesString.split('');
+
+                // Limit the number of candidates to display to avoid clutter
+                const maxCandidates = 15;
+                for (let i = 0; i < Math.min(candidatesArray.length, maxCandidates); i++) {
+                    const char = candidatesArray[i];
+                    const candidateItem = document.createElement('span');
+                    candidateItem.classList.add('pinyin-candidate-item');
+                    candidateItem.textContent = char;
+                    candidateItem.addEventListener('click', () => {
+                        characterInput.value = char; // Set the selected character to the input
+                        pinyinCandidatesDiv.innerHTML = ''; // Clear candidates after selection
+                        exploreButton.click(); // Trigger exploration for the selected character
+                    });
+                    pinyinCandidatesDiv.appendChild(candidateItem);
+                }
+            }
+        }
+
+        // Event listener for input changes to suggest Pinyin characters
+        characterInput.addEventListener('input', (event) => {
+            const inputVal = event.target.value.trim().toLowerCase();
+
+            // Check if the input is Pinyin (contains only Latin letters)
+            if (/^[a-z]+$/.test(inputVal)) {
+                displayPinyinCandidates(inputVal);
+                // Clear main display when typing Pinyin, until a character is selected
+                updateDisplay(null);
+            } else {
+                pinyinCandidatesDiv.innerHTML = ''; // Clear candidates if not typing Pinyin
+                // If it's a Chinese character, let the explore button handle it
+            }
+        });
+
+
+        // Event listener for the Explore button
+        exploreButton.addEventListener('click', () => {
+            const inputChar = characterInput.value.trim();
+            pinyinCandidatesDiv.innerHTML = ''; // Clear candidates on explore
+
+            // Basic validation: ensure only one Chinese character is entered
+            if (!inputChar) {
+                showMessage('Please enter a Chinese character or Pinyin.');
+                updateDisplay(null); // Clear display
+                return;
+            }
+
+            // If the input is a multi-character Chinese word, prompt the user to select one
+            if (inputChar.length > 1 && /[\u4e00-\u9fff]/.test(inputChar)) {
+                showMessage('Please select or enter only one Chinese character to explore its radical.');
+                updateDisplay(null); // Clear previous results
+                return;
+            }
+
+            // A very basic check if it looks like a Chinese character (might need more robust regex for full coverage)
+            if (!/[\u4e00-\u9fff]/.test(inputChar)) {
+                showMessage('Please enter a valid Chinese character.');
+                updateDisplay(null); // Clear display
+                return;
+            }
+
+            const data = chineseCharactersData[inputChar];
+
+            if (data) {
+                updateDisplay({
+                    character: inputChar,
+                    pinyin: data.pinyin,
+                    definition: data.definition,
+                    radical: data.radical
+                });
+            } else {
+                showMessage(`Sorry, information for "${inputChar}" not found in our current database. Try another character!`);
+                updateDisplay(null); // Clear display
+            }
+        });
+
+        // Allow pressing Enter key to trigger exploration
+        characterInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                exploreButton.click();
+            }
+        });
+
+        // Initial display reset
+        updateDisplay(null);
+    </script>
+</body>
+</html>
