@@ -9,6 +9,8 @@ most alternatives are:
 - Partial (e.g. no radicals)
 - Locked behind licenses
 
+The web address is: https://kulsrepository.github.io/Chinese-radical-linker/
+
 and this is absolutely free! You are free to use characters_data.json as you wish.
 
 radicals_details.json is all the radicals in all their forms
