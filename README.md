@@ -1,13 +1,7 @@
 This is a web-app capable of finding the definition and linked radical of around 9500 Chinese characters.
 
-You most likely can't run it as a file on a browser due to a CORS error which occurs due to Google not liking to read local JSON files.
-
-You can go to the folder where you downloaded this code throiugh cd-ing in cmd and then start a local server, then you can go to localhost 8000 with your browser 
-(http://localhost:8000/) if it isnt used to be able to use this app
-_________________________________________________________________________________________________
-
 characters_data.json is a data-readable JSON file of 9500 most used Chinese characters, accompanied by their definitions and their corresponding radicals.
-It was extracted from the GItHub for Make Me a Hanzi (https://github.com/skishore/makemeahanzi)'s dictionary.txt file downloaded as raw data into JSON format in characters_data.json. 
+It was extracted from the GitHub for "Make Me a Hanzi" (https://github.com/skishore/makemeahanzi)'s dictionary.txt file, downloaded as raw data into JSON format in characters_data.json. 
 
 characters_data.json is actually to my knowledge the first large-scale, JSON-native, analysis-ready dataset for Chinese characters with radicals, definitions, and components — directly usable in flashcard apps, APIs, and other tools without pre-processing. 
 most alternatives are:
