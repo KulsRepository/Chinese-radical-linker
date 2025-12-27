@@ -23,3 +23,8 @@ ________________________________________________________________________________
 The text box has an integrated pinyin keyboard, from which you can choose Chinese characters, many of which will be referenced in characters_data.json (many aren't as characters_data.json contains about 9500 Chinese 
 characters, which is much less than accessible with the pinyin keyboard). Once you see your chosen Chinese character in your keyboard, you can click on it and you will be met with its definition and radical it is 
 indexed under
+
+
+As I am very bad with HTML I do have to state that I got help from Artificial Intelligence with some parts of the HTML, as well as for the JSON 
+This is the only project of mine where some code is written by Artificial Intelligence, I make sure to minimize this as much as possible as I code to train my capacities.
+This project was mostly done out of necessity as I was curious about finding the roots of Chinese characters :)
